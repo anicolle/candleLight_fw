@@ -24,8 +24,7 @@ THE SOFTWARE.
 
 */
 
-#include <stdlib.h>
-#include <string.h>
+#include "usbd_gs_can.h"
 
 #include "can.h"
 #include "config.h"
@@ -38,9 +37,11 @@ THE SOFTWARE.
 #include "usbd_ctlreq.h"
 #include "usbd_def.h"
 #include "usbd_desc.h"
-#include "usbd_gs_can.h"
 #include "usbd_ioreq.h"
 #include "util.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 static volatile bool is_usb_suspend_cb = false;
 
@@ -230,7 +231,7 @@ static const uint8_t USBD_MS_EXT_PROP_FEATURE_DESC[] = {
 	0x33, 0x00, 0x7d, 0x00,
 	0x00, 0x00, 0x00, 0x00
 };
-
+bool reboot_request = false;
 
 // device info
 static const struct gs_device_config USBD_GS_CAN_dconf = {
@@ -537,7 +538,10 @@ bool USBD_GS_CAN_CustomDeviceRequest(USBD_HandleTypeDef *pdev, USBD_SetupReqType
 					return true;
 				}
 				break;
-
+			case 0x0006:
+				reboot_request = true;
+				USBD_CtlSendData(pdev, USBD_DescBuf, MIN(sizeof(USBD_MS_EXT_PROP_FEATURE_DESC), req->wLength));
+				return true;
 		}
 
 	}

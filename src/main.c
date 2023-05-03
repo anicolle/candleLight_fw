@@ -24,10 +24,6 @@ THE SOFTWARE.
 
 */
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-
 #include "can.h"
 #include "config.h"
 #include "device.h"
@@ -43,6 +39,10 @@ THE SOFTWARE.
 #include "usbd_desc.h"
 #include "usbd_gs_can.h"
 #include "util.h"
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 void HAL_MspInit(void);
 static void SystemClock_Config(void);
@@ -187,6 +187,13 @@ int main(void)
 		}
 
 		led_update(&hLED);
+		extern bool reboot_request;
+		if (reboot_request)
+		{
+			static int reboot_delay;
+			if (reboot_delay++ > 10000)
+				HAL_NVIC_SystemReset();
+		}
 
 		if (USBD_GS_CAN_DfuDetachRequested(&hUSB)) {
 			dfu_run_bootloader();
